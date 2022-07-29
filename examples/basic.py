@@ -11,23 +11,24 @@ def main2():
         print(row['func_def'])  # print function definition
         print(row['asm']['code'][0])  # print assembly with the first target, angha_gcc_x86_O0
         # print first I/O example (synthetic)
-        print('Input:', row['synth_io_pairs']['input'][0])
-        print('Output:', row['synth_io_pairs']['output'][0])
+        print('Input:', exebench_dict_to_dict(row['synth_io_pairs']['input'][0]))
+        print('Output:', exebench_dict_to_dict(row['synth_io_pairs']['output'][0]))
         print(row['synth_exe_wrapper'][0])  # print C++ wrapper to run function with IO
         # You can manually compile, run with IO, etc
         # TODO! somethimes row['func_head'] is not OK!
         # 3) Option B: Use ExeBenchFunc wrapper.
-        synth_wrapper = Wrapper(c_deps=row['synth_deps'], func_c_signature=row['func_head'], func_assembly=row['asm']['code'][0],
+        synth_wrapper = Wrapper(c_deps=row['synth_deps'] + '\n' + row['synth_io_pairs']['dummy_funcs'][0] + '\n', func_c_signature=row['func_head'], func_assembly=row['asm']['code'][0],
                                 cpp_wrapper=row['synth_exe_wrapper'])
         observed_output = synth_wrapper(exebench_dict_to_dict(row['synth_io_pairs']['input'][0]))  # Run synthetic example number 0
-        print('Input', row['synth_io_pairs']['input'][0])
-        print('Expected Output:', observed_output)
+        print('Input', exebench_dict_to_dict(row['synth_io_pairs']['input'][0]))
+        print('Observed Output:', observed_output)
         print('Does this output coincide with the expected one?',
               'Yes' if diff_io(observed_output=observed_output,
-                               expected_output=row['synth_io_pairs']['output'][0]) else 'No')
+                               expected_output=exebench_dict_to_dict(row['synth_io_pairs']['output'][0])) else 'No')
         # Run with custom IO (variable names must match:
         # inp = {'a': 3, ...}
         # exebench_func_wrapper(inp)
+        break  # TODO
 
 def main():
     # 1) Load dataset split. In this case, synthetic validation split

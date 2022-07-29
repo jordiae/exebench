@@ -82,7 +82,7 @@ class _DefaultAssembler(_Assembler):
 
 
 def _compile_exe_path(c_deps, func_c_signature, func_assembly, cpp_wrapper, assembler_backend):
-    assembler_backend(c_deps, func_c_signature, func_assembly, cpp_wrapper)
+    return assembler_backend(c_deps, func_c_signature, func_assembly, cpp_wrapper)
 
 # API
 
@@ -92,17 +92,29 @@ class Wrapper:
 
     @staticmethod
     def _compile_exe_path(c_deps, func_c_signature, func_assembly, cpp_wrapper, assembler_backend):
-        return _compile_exe_path(c_deps, func_assembly, func_c_signature, cpp_wrapper, assembler_backend)
+        return _compile_exe_path(c_deps, func_c_signature, func_assembly, cpp_wrapper, assembler_backend)
 
+    def _fix_nested_dict(self, inp):  # hack
+        from ast import literal_eval
+        if isinstance(inp, dict):
+            for k in inp:
+                inp[k] = self._fix_nested_dict(inp[k])
+        elif isinstance(inp, list):
+            for idx, e in enumerate(inp):
+                inp[idx] = self._fix_nested_dict(e)
+        else:
+            return literal_eval(inp)
+        return inp
     def __call__(self, inp, return_stdout_and_stderr=False):
         executable = self._compiled_exe_path
 
         with _get_tmp_path(content=None, suffix='.json') as input_tmp_json_path:
             output_file = ''.join(input_tmp_json_path.split(".")[:1]) + '-out.json'
+
+            #inp = self._fix_nested_dict(inp)
             with open(input_tmp_json_path, 'w') as f:
                 json.dump(inp, f)
             stdout, stderr = _run_command(f'{executable} {input_tmp_json_path} {output_file}')
-            print()
             with open(output_file, 'r') as f:
                 output = json.load(f)
             os.remove(output_file)
@@ -140,8 +152,20 @@ def diff_io(observed_output, expected_output) -> bool:
             return False
     return True
 
+from ast import literal_eval
+def _fix_nested_dict(inp):  # hack
+
+    if isinstance(inp, dict):
+        for k in inp:
+            inp[k] = _fix_nested_dict(inp[k])
+    elif isinstance(inp, list):
+        for idx, e in enumerate(inp):
+            inp[idx] = _fix_nested_dict(e)
+    else:
+        return literal_eval(inp)
+    return inp
 
 def exebench_dict_to_dict(exebench_dict):
     keys = exebench_dict['var']
     values = exebench_dict['value']
-    return {k: v for k, v in zip(keys, values)}
+    return _fix_nested_dict({k: v for k, v in zip(keys, values)})
