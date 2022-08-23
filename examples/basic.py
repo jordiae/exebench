@@ -4,7 +4,7 @@ from exebench import Wrapper, diff_io, exebench_dict_to_dict
 
 def main():
     # 1) Load dataset split. In this case, synthetic test split
-    dataset = load_dataset('jordiae/exebench', split='test_synth', use_auth_token=True)
+    dataset = load_dataset('jordiae/exebench', split='test_synth') # , use_auth_token=True)
     # 2) Iterate over dataset
     for row in dataset:
         # Do stuff with each row
