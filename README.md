@@ -1,13 +1,59 @@
 # ExeBench: an ML-scale dataset of executable C functions
 
+ExeBench is a dataset of millions of C functions paired with dependencies and metadatada such that at least a subset of it can be executed with IO pairs. It is mainly inteded for machine learning applications but it is application-agnostic enough to have other usages.
+Please read the paper for more information: https://dl.acm.org/doi/abs/10.1145/3520312.3534867
+
 ## Usage
 
+### Option 1: Using the helpers in this repo
+
+
 ```
-# Load dataset split. In this case, synthetic test split
-dataset = load_dataset('jordiae/exebench', split='test_synth')
+git clone https://github.com/jordiae/exebench.git
+cd exebench/
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements_examples.txt
+PYTHONPATH="${PYTHONPATH}:${pwd}" python examples/basic.py
 ```
 
-See examples/ for examples.
+### Option 2: Directly using the Hugginface Datasets library
+
+
+```
+!pip install datasets zstandard
+
+# Load dataset split. In this case, synthetic test split
+dataset = load_dataset('jordiae/exebench', split='test_synth')
+for e in dataset:
+  ...
+```
+
+### Option 3: Directly download the dataset
+
+Take a look at the files at: https://huggingface.co/datasets/jordiae/exebench/tree/main
+The dataset consist of directories compressed with TAR. Inside each TAR, there is a series of jsonline files compressed with zstandard.
+
+## Statistics and versions
+
+This release corresponds to ExeBench v1.01, a version with some improvements with respect to the original one presented in the paper. The statistics and studies presented in the paper remain consistent with respect to the new ones. The final splits of the new version consist of the following functions:
+
+
+```
+train_not_compilable: 2.357M
+train_synth_compilable: 2.308373M
+train_real_compilable: 0.675074M
+train_synth_simple_io: 0.550116M
+train_real_simple_io: 0.043769M
+train_synth_rich_io: 0.097250M
+valid_synth: 5k
+valid_real: 2.133k
+test_synth: 5k
+test_real: 2.134k
+```
+
+The original dataset (v1.00) with the exact same data studied in the paper can be accessed on request at: https://huggingface.co/datasets/jordiae/exebench_legacy (please reach out for access)
+
 
 ## License
 
@@ -37,7 +83,7 @@ series = {MAPS 2022}
 
 ## Credits
 
-We thank Anghabench authors for their type inference-based synthetic dependencies generation for C functions.
+We thank Anghabench authors for their type inference-based synthetic dependencies generation for C functions. This software, Psyche-C, can be found at: https://github.com/ltcmelo/psychec
 
 ## Contact
 
