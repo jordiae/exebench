@@ -22,6 +22,7 @@ PYTHONPATH="${PYTHONPATH}:${pwd}" python examples/basic.py
 
 ```
 !pip install datasets zstandard
+from datasets import load_dataset
 
 # Load dataset split. In this case, synthetic test split
 dataset = load_dataset('jordiae/exebench', split='test_synth')
